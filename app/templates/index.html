@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            color: #1f2937;
+        }
+        header {
+            background: #172554;
+            color: white;
+            padding: 24px 40px;
+        }
+        main {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+        .panel {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px #0000000a;
+        }
+        .status {
+            color: #15803d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{ app_name }}</h1>
+        <p>Media Intelligence – Local News Archive</p>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Dashboard</h2>
+            <p>Selamat datang di aplikasi Media Intelligence.</p>
+            <p class="status">● Sistem berjalan normal</p>
+            <p>Versi aplikasi: {{ version }}</p>
+            <hr>
+            <h3>Modul aplikasi</h3>
+            <ul>
+                <li>Source Management</li>
+                <li>News Collection</li>
+                <li>News Archive</li>
+                <li>Collection Monitor</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
