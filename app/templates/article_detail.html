@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} - GPR Media Intelligence</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            color: #1f2937;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 30px;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        header p {
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        nav {
+            margin-top: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 18px;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        h2 {
+            color: #172554;
+            font-size: 25px;
+            line-height: 1.5;
+            margin-top: 0;
+        }
+
+        .metadata {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 18px;
+            margin: 22px 0;
+        }
+
+        .metadata p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .metadata strong {
+            color: #1e293b;
+        }
+
+        .summary {
+            padding: 16px;
+            margin-bottom: 24px;
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            line-height: 1.7;
+        }
+
+        .content {
+            font-size: 15px;
+            line-height: 1.9;
+            color: #334155;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .source-button {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 11px 18px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .source-button:hover {
+            background: #1d4ed8;
+        }
+
+        @media (max-width: 600px) {
+            .panel {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>GPR Media Intelligence</h1>
+    <p>Arsip dan Pemantauan Pemberitaan Media</p>
+
+    <nav>
+        <a href="/sources">Media</a>
+        <a href="/collection">Pengumpulan Berita</a>
+        <a href="/articles">Arsip Berita</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <a href="/articles" class="back-link">
+        &larr; Kembali ke Arsip Berita
+    </a>
+
+    <div class="panel">
+
+        <h2>{{ article.title }}</h2>
+
+        <div class="metadata">
+
+            <p>
+                <strong>Media:</strong>
+                {{ article.source.name if article.source else 'Tidak diketahui' }}
+            </p>
+
+            <p>
+                <strong>Penulis:</strong>
+                {{ article.author or 'Tidak tersedia' }}
+            </p>
+
+            <p>
+                <strong>Tanggal Publikasi:</strong>
+                {{ article.published_at.strftime('%d-%m-%Y %H:%M') if article.published_at else 'Tidak tersedia' }}
+            </p>
+
+            <p>
+                <strong>Waktu Pengumpulan:</strong>
+                {{ article.collected_at.strftime('%d-%m-%Y %H:%M') if article.collected_at else 'Tidak tersedia' }}
+            </p>
+
+        </div>
+
+        {% if article.summary %}
+        <div class="summary">
+            <strong>Ringkasan:</strong>
+            <p>{{ article.summary }}</p>
+        </div>
+        {% endif %}
+
+        <h3>Isi Artikel</h3>
+
+        <div class="content">{{ article.content or 'Isi artikel tidak tersedia.' }}</div>
+
+        {% if article.url %}
+        <a
+            href="{{ article.url }}"
+            class="source-button"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Buka Artikel Asli
+        </a>
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengumpulan Artikel - GPR Media Intelligence</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            background: #f3f6fb;
+            color: #1e293b;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+        }
+
+        .source-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .source-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 13px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .source-option input {
+            width: auto;
+            margin-top: 3px;
+        }
+
+        .source-option label {
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .source-status {
+            display: block;
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 22px;
+            background: #2563eb;
+            color: white;
+            border: 0;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .stat {
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 8px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 25px;
+            margin-top: 8px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .failure-section {
+            margin-top: 25px;
+        }
+
+        .failure-table-wrapper {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        .failure-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .failure-table th,
+        .failure-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .failure-table th {
+            background: #f8fafc;
+            white-space: nowrap;
+        }
+
+        .failure-table td {
+            overflow-wrap: anywhere;
+        }
+
+        .failure-table a {
+            word-break: break-word;
+        }
+
+        .failure-reason {
+            color: #991b1b;
+            min-width: 220px;
+        }
+
+        .no-failure {
+            color: #166534;
+            background: #dcfce7;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        @media(max-width: 650px) {
+            .form-grid, .stats, .source-list {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="card">
+        <h1>Pengumpulan Artikel</h1>
+        <p class="muted">
+            GPR Media Intelligence — News Collector
+        </p>
+
+        <p>
+            <a href="/sources">← Kembali ke Manajemen Sumber Media</a>
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Jalankan Pengumpulan</h2>
+
+        <p>
+            Tentukan tanggal publikasi dan sumber media yang akan diproses.
+            Hanya sumber yang dipilih dan masih aktif yang akan dikumpulkan.
+        </p>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if active_sources %}
+        <form method="POST" action="/collection/run">
+
+            <div class="form-grid">
+                <div>
+                    <label for="date_from">Tanggal Awal</label>
+                    <input
+                        type="date"
+                        id="date_from"
+                        name="date_from"
+                        value="{{ date_from_value }}"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="date_to">Tanggal Akhir</label>
+                    <input
+                        type="date"
+                        id="date_to"
+                        name="date_to"
+                        value="{{ date_to_value }}"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div style="margin-top: 24px;">
+                <label>Sumber Media Aktif</label>
+                <div class="source-list">
+                    {% for source in active_sources %}
+                    <div class="source-option">
+                        <input
+                            type="checkbox"
+                            id="source_{{ source.id }}"
+                            name="source_ids"
+                            value="{{ source.id }}"
+                            {% if source.id in selected_source_ids %}checked{% endif %}
+                        >
+                        <label for="source_{{ source.id }}">
+                            {{ source.name }}
+                            <span class="source-status">
+                                {% if source.validation_status == "passed" and source.validation_config %}
+                                    Validasi teknis: Lulus
+                                {% else %}
+                                    Sumber aktif lama · Belum tercatat lulus validasi
+                                {% endif %}
+                            </span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="muted">
+                    Sumber yang telah lolos validasi dipilih otomatis. Anda dapat
+                    mengubah pilihan sebelum menjalankan pengumpulan.
+                </p>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Mulai Pengumpulan Artikel</button>
+            </div>
+
+        </form>
+        {% else %}
+            <div class="error">
+                Belum ada sumber media aktif. Aktifkan sumber yang telah disetujui
+                pada halaman Manajemen Sumber Media.
+            </div>
+        {% endif %}
+    </div>
+
+    {% if result %}
+    <div class="card">
+
+        <h2>Hasil Pengumpulan</h2>
+
+        {% if result.status == "completed" %}
+            <div class="success">
+                Proses pengumpulan selesai.
+            </div>
+        {% else %}
+            <div class="error">
+                Proses pengumpulan tidak selesai.
+                {{ result.error_message or "" }}
+            </div>
+        {% endif %}
+
+        <div class="stats">
+
+            <div class="stat">
+                Sumber diperiksa
+                <strong>{{ result.sources_checked }}</strong>
+            </div>
+
+            <div class="stat">
+                Artikel ditemukan
+                <strong>{{ result.articles_found }}</strong>
+            </div>
+
+            <div class="stat">
+                Artikel tersimpan
+                <strong>{{ result.articles_saved }}</strong>
+            </div>
+
+            <div class="stat">
+                Duplikat dilewati
+                <strong>{{ result.duplicates_skipped }}</strong>
+            </div>
+
+            <div class="stat">
+                Artikel gagal
+                <strong>{{ result.articles_failed }}</strong>
+            </div>
+
+            <div class="stat">
+                ID proses
+                <strong>
+                    {% if result.run_id is not none %}
+                        #{{ result.run_id }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </strong>
+            </div>
+
+        </div>
+
+        <p class="muted">
+            Angka artikel ditemukan menunjukkan jumlah kandidat unik dari metode
+            penemuan yang digunakan oleh sumber terpilih, bukan jumlah seluruh
+            artikel yang tersedia di website.
+        </p>
+
+        {% if result.articles_failed > 0 %}
+        <div class="failure-section">
+
+            <h3>Rincian Kegagalan</h3>
+
+            <p class="muted">
+                Berikut rincian artikel atau sumber yang gagal diproses.
+            </p>
+
+            {% if result.failure_details %}
+            <div class="failure-table-wrapper">
+
+                <table class="failure-table">
+                    <thead>
+                        <tr>
+                            <th>Sumber Media</th>
+                            <th>Tahap</th>
+                            <th>URL</th>
+                            <th>Alasan Kegagalan</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for failure in result.failure_details %}
+                        <tr>
+                            <td>{{ failure.source }}</td>
+
+                            <td>{{ failure.stage }}</td>
+
+                            <td>
+                                {% if failure.url.startswith("http") %}
+                                    <a
+                                        href="{{ failure.url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Buka URL
+                                    </a>
+                                {% else %}
+                                    {{ failure.url }}
+                                {% endif %}
+                            </td>
+
+                            <td class="failure-reason">
+                                {{ failure.reason }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            {% else %}
+                <p class="muted">
+                    Jumlah kegagalan tercatat, tetapi rincian tidak tersedia.
+                </p>
+            {% endif %}
+
+        </div>
+
+        {% elif result.status == "completed" %}
+        <div class="failure-section no-failure">
+            Tidak ada kegagalan selama proses pengumpulan.
+        </div>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
+</div>
+</body>
+</html>

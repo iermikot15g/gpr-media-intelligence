@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsip Berita - GPR Media Intelligence</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f5f9;
+            color: #1f2937;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 30px;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        header p {
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        nav {
+            margin-top: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 18px;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #172554;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 12px;
+            align-items: end;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button, .reset-button {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .reset-button {
+            background: #64748b;
+        }
+
+        .article-item {
+            padding: 18px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .article-item:last-child {
+            border-bottom: none;
+        }
+
+        .article-item h3 {
+            margin: 0 0 9px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .article-item h3 a {
+            color: #1d4ed8;
+            text-decoration: none;
+        }
+
+        .article-item h3 a:hover {
+            text-decoration: underline;
+        }
+
+        .meta {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 9px;
+        }
+
+        .summary {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .pagination a {
+            padding: 9px 14px;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .pagination span {
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .empty {
+            padding: 30px 10px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        @media (max-width: 800px) {
+            .filter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 20px;
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0 25px;
+        }
+
+        .stat-card {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        .stat-label {
+            color: #475569;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            color: #172554;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .source-stats {
+            margin-bottom: 25px;
+        }
+
+        .source-stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 5px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        @media (max-width: 650px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>GPR Media Intelligence</h1>
+    <p>Arsip dan Pemantauan Pemberitaan Media</p>
+
+    <nav>
+        <a href="/sources">Media</a>
+        <a href="/collection">Pengumpulan Berita</a>
+        <a href="/articles">Arsip Berita</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <div class="panel">
+        <h2>Arsip Berita</h2>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-label">Total Artikel Tersimpan</div>
+                <div class="stat-number">{{ total_articles_all }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Media Terdaftar</div>
+                <div class="stat-number">{{ total_sources }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Hasil Pencarian</div>
+                <div class="stat-number">{{ total_articles }}</div>
+            </div>
+
+        </div>
+
+        <h3>Jumlah Artikel Berdasarkan Media</h3>
+
+        <div class="source-stats">
+            {% for source_name, article_count in article_counts %}
+            <div class="source-stat-row">
+                <span>{{ source_name }}</span>
+                <strong>{{ article_count }} artikel</strong>
+            </div>
+            {% else %}
+            <p>Belum ada media terdaftar.</p>
+            {% endfor %}
+        </div>
+
+        <form method="get" action="/articles">
+            <div class="filter-grid">
+
+                <div>
+                    <label for="q">Kata kunci</label>
+                    <input
+                        type="text"
+                        id="q"
+                        name="q"
+                        value="{{ q }}"
+                        placeholder="Cari judul atau isi berita..."
+                    >
+                </div>
+
+                <div>
+                    <label for="source_id">Media</label>
+                    <select id="source_id" name="source_id">
+                        <option value="">Semua Media</option>
+
+                        {% for source in sources %}
+                        <option
+                            value="{{ source.id }}"
+                            {% if selected_source == source.id %}selected{% endif %}
+                        >
+                            {{ source.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="date_from">Tanggal publikasi dari</label>
+                    <input
+                        type="date"
+                        id="date_from"
+                        name="date_from"
+                        value="{{ date_from.isoformat() if date_from else '' }}"
+                    >
+                </div>
+
+                <div>
+                    <label for="date_to">Tanggal publikasi sampai</label>
+                    <input
+                        type="date"
+                        id="date_to"
+                        name="date_to"
+                        value="{{ date_to.isoformat() if date_to else '' }}"
+                    >
+                </div>
+
+                <div>
+                    <label for="sort">Urutan artikel</label>
+                    <select id="sort" name="sort">
+                        <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Terbaru</option>
+                        <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Terlama</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 16px;">
+                <button type="submit">Terapkan Filter</button>
+                <a href="/articles" class="reset-button">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="panel">
+
+        {% if articles %}
+
+            {% for article in articles %}
+            <div class="article-item">
+
+                <h3>
+                    <a href="/articles/{{ article.id }}">
+                        {{ article.title }}
+                    </a>
+                </h3>
+
+                <div class="meta">
+                    Media:
+                    {{ article.source.name if article.source else 'Tidak diketahui' }}
+
+                    &nbsp;|&nbsp;
+
+                    Publikasi:
+                    {{ article.published_at.strftime('%d-%m-%Y') if article.published_at else 'Tanggal tidak tersedia' }}
+
+                    &nbsp;|&nbsp;
+
+                    Dikumpulkan:
+                    {{ article.collected_at.strftime('%d-%m-%Y %H:%M') if article.collected_at else 'Tidak diketahui' }}
+                </div>
+
+                <div class="summary">
+                    {{ article.summary or (article.content[:300] ~ '...' if article.content else 'Tidak ada ringkasan.') }}
+                </div>
+
+            </div>
+            {% endfor %}
+
+            <div class="pagination">
+
+                {% if page > 1 %}
+                <a href="/articles?q={{ q|urlencode }}&source_id={{ selected_source or '' }}&date_from={{ date_from.isoformat() if date_from else '' }}&date_to={{ date_to.isoformat() if date_to else '' }}&sort={{ sort }}&page={{ page - 1 }}">
+                    Sebelumnya
+                </a>
+                {% endif %}
+
+                <span>
+                    Halaman {{ page }} dari {{ total_pages }}
+                </span>
+
+                {% if page < total_pages %}
+                <a href="/articles?q={{ q|urlencode }}&source_id={{ selected_source or '' }}&date_from={{ date_from.isoformat() if date_from else '' }}&date_to={{ date_to.isoformat() if date_to else '' }}&sort={{ sort }}&page={{ page + 1 }}">
+                    Berikutnya
+                </a>
+                {% endif %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty">
+                <h3>Belum ada artikel yang sesuai</h3>
+                <p>Coba ubah kata kunci atau rentang tanggal publikasi.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>
