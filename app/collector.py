@@ -408,7 +408,7 @@ def collect_homepage_urls(client, base_url, robots, max_urls=MAX_CANDIDATES_PER_
     results = []
     for article_url in discovered:
         try:
-            validate_public_url(article_url, allowed_host=host)
+            validate_public_url(article_url, allowed_host=host, resolve_dns=False)
             if not robots.can_fetch(USER_AGENT, article_url):
                 continue
             if is_non_article_url(article_url):
@@ -837,6 +837,7 @@ def collect_articles(date_from, date_to, source_ids=None):
                             validate_public_url(
                                 candidate_url,
                                 allowed_host=allowed_host,
+                                resolve_dns=False,
                             )
                         except Exception as exc:
                             logger.info(

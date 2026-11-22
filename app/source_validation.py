@@ -15,6 +15,10 @@ from sqlalchemy.orm import Session
 
 from app.models import MediaSource, SourceValidationRun
 
+# Keep the genuine HTTPX client type even when collector tests monkeypatch
+# httpx.Client. Only genuine network clients require DNS resolution here.
+_HTTPX_CLIENT_CLASS = httpx.Client
+
 USER_AGENT = "GPRMediaIntelligence/1.0"
 TIMEOUT = httpx.Timeout(12.0, connect=5.0)
 MAX_SAMPLE_URLS = 3
@@ -108,34 +112,71 @@ def validate_public_url(
 
 
 def safe_get(client: httpx.Client, url: str, allowed_host: str):
+    """GET dengan validasi target dan redirect sebelum setiap request.
+
+    Resolusi DNS diwajibkan untuk HTTPX Client nyata. Test doubles tidak
+    membuka koneksi jaringan sehingga cukup melewati pemeriksaan DNS, tetapi
+    tetap melewati pemeriksaan skema, port, host, dan IP literal.
+    """
     current = url
+    is_real_http_client = isinstance(client, _HTTPX_CLIENT_CLASS)
+
     for _ in range(MAX_REDIRECTS + 1):
-        # Real HTTP clients always receive DNS/IP validation. Mock clients used
-        # by unit tests have no network transport and must not trigger DNS.
-        is_real_http_client = isinstance(client, httpx.Client)
         validate_public_url(
             current,
             allowed_host=allowed_host,
             resolve_dns=is_real_http_client,
         )
         response = client.get(current, follow_redirects=False)
-        content_length = response.headers.get("content-length")
+
+        # HTTPX real mengembalikan Headers dan bytes. Pemeriksaan bertipe ini
+        # juga membuat response mock sederhana dapat dipakai dalam unit test.
+        headers = getattr(response, "headers", {})
+        content_length = None
+        if hasattr(headers, "get"):
+            try:
+                candidate_length = headers.get("content-length")
+                if isinstance(candidate_length, str):
+                    content_length = candidate_length
+            except Exception:
+                content_length = None
+
         if content_length:
             try:
                 if int(content_length) > MAX_RESPONSE_BYTES:
-                    raise ValueError("Respons website melebihi batas ukuran validasi.")
+                    raise ValueError(
+                        "Respons website melebihi batas ukuran validasi."
+                    )
             except ValueError as exc:
                 if "melebihi batas" in str(exc):
                     raise
-                raise ValueError("Header ukuran respons website tidak valid.") from exc
-        if response.status_code not in (301, 302, 303, 307, 308):
-            if len(response.content) > MAX_RESPONSE_BYTES:
-                raise ValueError("Respons website melebihi batas ukuran validasi.")
+                raise ValueError(
+                    "Header ukuran respons website tidak valid."
+                ) from exc
+
+        status_code = getattr(response, "status_code", None)
+        if status_code not in (301, 302, 303, 307, 308):
+            body = getattr(response, "content", None)
+            if isinstance(body, (bytes, bytearray, memoryview, str)):
+                body_size = len(body)
+            else:
+                text_body = getattr(response, "text", None)
+                body_size = len(text_body.encode("utf-8")) if isinstance(
+                    text_body, str
+                ) else 0
+            if body_size > MAX_RESPONSE_BYTES:
+                raise ValueError(
+                    "Respons website melebihi batas ukuran validasi."
+                )
             return response
-        location = response.headers.get("location")
-        if not location:
+
+        location = headers.get("location") if hasattr(headers, "get") else None
+        if not isinstance(location, str) or not location.strip():
             return response
-        current = urljoin(str(response.url), location)
+
+        response_url = getattr(response, "url", current)
+        current = urljoin(str(response_url), location)
+
     raise ValueError("Terlalu banyak pengalihan website.")
 
 
